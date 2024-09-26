@@ -20,6 +20,11 @@ pub fn publish_evm_bytecode_interface() -> ethabi::Contract {
             {
                 "inputs": [
                   {
+                    "internalType": "bytes32",
+                    "name": "vesionedBytecodeHash",
+                    "type": "bytes32"
+                  },
+                  {
                     "internalType": "bytes",
                     "name": "bytecode",
                     "type": "bytes"
@@ -111,7 +116,7 @@ pub(crate) fn record_deployed_evm_bytecode<const B: bool, const N: usize, E: VmE
         return;
     };
 
-    let published_bytecode = call_params[0].clone().into_bytes().unwrap();
+    let published_bytecode = call_params[1].clone().into_bytes().unwrap();
 
     let hash = hash_evm_bytecode(&published_bytecode);
     let as_words = bytes_to_be_words(published_bytecode);
