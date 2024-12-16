@@ -117,12 +117,13 @@ pub(crate) fn record_deployed_evm_bytecode<const B: bool, const N: usize, E: VmE
     };
 
     println!("call params: {:?}", call_params);
-    let published_bytecode_evm_len = call_params[0]
+    let published_bytecode_evm_len = 0;
+    /*let published_bytecode_evm_len = call_params[0]
         .clone()
         .into_int()
         .unwrap()
         .try_into()
-        .unwrap();
+        .unwrap();*/
     let published_bytecode = call_params[1].clone().into_bytes().unwrap();
 
     let hash = hash_evm_bytecode(published_bytecode_evm_len, &published_bytecode);
