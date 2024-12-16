@@ -20,6 +20,11 @@ pub fn publish_evm_bytecode_interface() -> ethabi::Contract {
             {
                 "inputs": [
                   {
+                    "internalType": "uint256",
+                    "name": "bytecodeLen",
+                    "type": "uint256"
+                  },
+                  {
                     "internalType": "bytes",
                     "name": "bytecode",
                     "type": "bytes"
@@ -111,9 +116,15 @@ pub(crate) fn record_deployed_evm_bytecode<const B: bool, const N: usize, E: VmE
         return;
     };
 
-    let published_bytecode = call_params[0].clone().into_bytes().unwrap();
+    let published_bytecode_evm_len = call_params[0]
+        .clone()
+        .into_int()
+        .unwrap()
+        .try_into()
+        .unwrap();
+    let published_bytecode = call_params[1].clone().into_bytes().unwrap();
 
-    let hash = hash_evm_bytecode(&published_bytecode);
+    let hash = hash_evm_bytecode(published_bytecode_evm_len, &published_bytecode);
     let as_words = bytes_to_be_words(published_bytecode);
 
     let (_, normalized) = BlobSha256Format::normalize_for_decommitment(hash.as_fixed_bytes());
@@ -132,10 +143,10 @@ pub fn h256_to_u256(num: H256) -> U256 {
     U256::from_big_endian(num.as_bytes())
 }
 
-pub(crate) fn hash_evm_bytecode(bytecode: &[u8]) -> H256 {
+pub(crate) fn hash_evm_bytecode(bytecode_evm_len: usize, bytecode: &[u8]) -> H256 {
     use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
-    let len = bytecode.len() as u16;
+    let len = bytecode_evm_len as u16;
     hasher.update(bytecode);
     let result = hasher.finalize();
 
