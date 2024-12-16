@@ -116,6 +116,7 @@ pub(crate) fn record_deployed_evm_bytecode<const B: bool, const N: usize, E: VmE
         return;
     };
 
+    println!("call params: {:?}", call_params);
     let published_bytecode_evm_len = call_params[0]
         .clone()
         .into_int()
