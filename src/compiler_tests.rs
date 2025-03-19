@@ -254,7 +254,7 @@ pub fn run_vm(
     known_contracts: HashMap<U256, Vec<u8>>,
     known_sha256_blobs: HashMap<U256, Vec<U256>>,
     default_aa_code_hash: U256,
-    evm_simulator_code_hash: U256,
+    evm_emulator_code_hash: U256,
 ) -> anyhow::Result<VmSnapshot> {
     let entry_address = default_entry_point_contract_address();
     let mut contracts: HashMap<Address, Vec<u8>> = HashMap::new();
@@ -272,7 +272,7 @@ pub fn run_vm(
         known_contracts,
         known_sha256_blobs,
         default_aa_code_hash,
-        evm_simulator_code_hash,
+        evm_emulator_code_hash,
     )
 }
 
@@ -365,6 +365,7 @@ pub fn create_vm<const B: bool>(
         tools.decommittment_processor,
         tools.witness_tracer,
         block_properties,
+        Version::Version27
     );
 
     let initial_context = CallStackEntry {
@@ -417,7 +418,7 @@ pub fn run_vm_multi_contracts(
     known_contracts: HashMap<U256, Vec<u8>>,
     known_sha256_blobs: HashMap<U256, Vec<U256>>,
     default_aa_code_hash: U256,
-    evm_simulator_code_hash: U256,
+    evm_emulator_code_hash: U256,
 ) -> anyhow::Result<VmSnapshot> {
     let contracts = contracts
         .into_iter()
@@ -452,7 +453,7 @@ pub fn run_vm_multi_contracts(
         known_contracts,
         known_sha256_blobs,
         default_aa_code_hash,
-        evm_simulator_code_hash,
+        evm_emulator_code_hash,
     )
 }
 
@@ -473,7 +474,7 @@ fn run_vm_multi_contracts_inner(
     known_contracts: HashMap<U256, Vec<[u8; 32]>>,
     known_sha256_blobs: HashMap<U256, Vec<U256>>,
     default_aa_code_hash: U256,
-    evm_simulator_code_hash: U256,
+    evm_emulator_code_hash: U256,
 ) -> anyhow::Result<VmSnapshot> {
     let (set_far_call_props, extra_props) = match &vm_launch_option {
         VmLaunchOption::Default => (true, None),
@@ -484,7 +485,7 @@ fn run_vm_multi_contracts_inner(
     let mut block_properties = create_default_block_properties();
     block_properties.default_aa_code_hash = default_aa_code_hash;
     // we can always pretend it to be empty account
-    block_properties.evm_simulator_code_hash = evm_simulator_code_hash;
+    block_properties.evm_emulator_code_hash = evm_emulator_code_hash;
 
     let calldata_length = calldata.len();
 
@@ -501,7 +502,7 @@ fn run_vm_multi_contracts_inner(
         // If it's an EVM contract, we should run the EVM simulator
         if hash.as_bytes()[0] == BlobSha256Format::VERSION_BYTE {
             known_contracts
-                .get(&evm_simulator_code_hash)
+                .get(&evm_emulator_code_hash)
                 .cloned()
                 .ok_or_else(|| {
                     anyhow::anyhow!("EVM simulator bytecode not found in the known contracts")
